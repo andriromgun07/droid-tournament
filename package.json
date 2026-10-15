@@ -1,0 +1,18 @@
+{
+  "name": "droid-tournament",
+  "private": true,
+  "type": "module",
+  "description": "Pengacak dan pencatat turnamen badminton",
+  "scripts": {
+    "dev": "netlify dev",
+    "test": "node test/simulate.cjs && node test/api.test.mjs",
+    "serve:test": "node test/dev-server.mjs"
+  },
+  "dependencies": {
+    "@netlify/database": "^2.0.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "@electric-sql/pglite-socket": "^0.2.13"
+  }
+}
