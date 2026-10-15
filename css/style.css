@@ -295,3 +295,22 @@ button { cursor: pointer; }
   @keyframes deal { from { opacity: 0; transform: translateY(12px); } }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------- siap-siap ronde berikutnya ---------- */
+.up-next { margin-top: 22px; padding-top: 4px; border-top: 1.5px dashed var(--line); }
+.up-next-head { display: flex; justify-content: space-between; align-items: center; }
+.up-next-head .section-title { margin: 14px 0 8px; }
+.up-next-head .link-btn { font-size: 14px; }
+.mini-row { display: grid; grid-template-columns: 40px 1fr; align-items: center; gap: 8px; margin-bottom: 8px; }
+.mini-court { font: 700 15px/1.1 var(--display); color: var(--muted); }
+.court.mini { min-height: 0; border-width: 2px; opacity: .92; }
+.court.mini::before { width: 2px; margin-left: -1px; top: -2px; bottom: -2px; }
+.court.mini .half { padding: 8px 12px; gap: 0; flex-direction: column; }
+.court.mini .half::after { display: none; }
+.mini-name { font-weight: 600; font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+.mini-name.busy::after,
+.busy-dot { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--shuttle); margin-left: 6px; vertical-align: 2px; }
+.court.mini .half.b .mini-name.busy::after { margin: 0 0 0 6px; }
+.up-next-rest { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+.up-next-note { margin: 6px 0 0; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.up-next-note .busy-dot { margin-left: 0; }

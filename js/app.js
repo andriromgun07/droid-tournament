@@ -349,24 +349,48 @@
           (nrList.length ? '<div class="nr">Belum siap: ' + nrList.map(nameTag).join(', ') + '</div>' : '')
         : '';
     }
+    renderUpNext(past);
     renderPlayFoot();
     $('#sync-status').hidden = false;
     if (!dirty && state.id) setSync('ok', 'Tersimpan');
     else if (!state.id && !dirty) setSync('off', 'Belum tersimpan ke server');
   }
 
+  // Susunan ronde berikutnya, supaya pemain bisa siap-siap selagi ronde sekarang berjalan.
+  function renderUpNext(past) {
+    const box = $('#up-next');
+    if (past) { box.hidden = true; return; }
+    if (E.ensureNextPlan(state)) persist();
+    const plan = state.nextPlan;
+    if (!plan || !plan.matches.length) { box.hidden = true; return; }
+    const cur = E.currentRound(state);
+    const onCourt = new Set(cur.matches.flatMap(E.matchIds));
+    const side = ids => ids.map(id => '<span class="mini-name' + (onCourt.has(id) ? ' busy' : '') + '">' + nameTag(id) + '</span>').join('');
+    const rest = E.nextBench(state);
+    box.innerHTML =
+      '<div class="up-next-head"><h2 class="section-title" id="up-next-title">Siap-siap ronde ' + (state.rounds.length + 1) + '</h2>' +
+      '<button class="link-btn" data-act="replan">Acak ulang</button></div>' +
+      plan.matches.map(m =>
+        '<div class="mini-row"><span class="mini-court">Lap ' + m.court + '</span>' +
+        '<div class="court mini"><div class="half a">' + side(m.a) + '</div><div class="half b">' + side(m.b) + '</div></div></div>').join('') +
+      (rest.length ? '<p class="up-next-rest">Istirahat: ' + rest.map(nameTag).join(', ') + '</p>' : '') +
+      (plan.matches.some(m => E.matchIds(m).some(id => onCourt.has(id)))
+        ? '<p class="up-next-note"><span class="busy-dot" aria-hidden="true"></span>Masih main di ronde ini</p>' : '');
+    box.hidden = false;
+  }
+
   function renderPlayFoot() {
     const { round, past } = viewedRound();
     const btn = $('#btn-next');
     const hint = $('#play-hint');
-    btn.textContent = 'Acak ronde ' + (state.rounds.length + 1);
+    btn.textContent = 'Mulai ronde ' + (state.rounds.length + 1);
     if (past) { hint.textContent = ''; btn.disabled = true; return; }
     const total = round.matches.length;
     const doneN = round.matches.filter(m => m.result !== null).length;
     const enough = E.activePlayers(state).length >= E.perMatch(state);
     hint.className = 'foot-note' + (enough ? '' : ' warn');
     hint.textContent = !enough ? 'Pemain aktif kurang untuk satu lapangan. Tambah pemain lewat Menu.'
-      : doneN === total ? 'Semua lapangan selesai. Siap acak ronde berikutnya.'
+      : doneN === total ? 'Semua lapangan selesai. Pemain ronde ' + (state.rounds.length + 1) + ' silakan masuk lapangan.'
       : (total - doneN) + ' lapangan belum ada hasil.';
     btn.disabled = !(enough && doneN === total);
   }
@@ -396,7 +420,8 @@
     if (!res.ok) { toast(res.error); return; }
     viewIdx = null;
     persist();
-    draw(() => { renderPlay(true); window.scrollTo(0, 0); });
+    renderPlay(true);
+    window.scrollTo(0, 0);
   }
 
   // ---------- sheet: belum siap ----------
@@ -568,6 +593,12 @@
     const inp = e.target.closest('.score-in'); if (!inp) return;
     E.setScore(state, inp.dataset.m, inp.dataset.side, inp.value);
     persist(); refreshCourtVisual(inp.dataset.m);
+  });
+  $('#up-next').addEventListener('click', e => {
+    if (!e.target.closest('[data-act="replan"]')) return;
+    E.ensureNextPlan(state, true);
+    persist(); renderPlay();
+    toast('Susunan ronde ' + (state.rounds.length + 1) + ' diacak ulang.');
   });
   $('#round-chips').addEventListener('click', e => {
     const b = e.target.closest('[data-r]'); if (!b) return;

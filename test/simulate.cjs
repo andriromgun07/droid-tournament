@@ -83,4 +83,27 @@ assert(r.backToBackF <= 2);
   assert(!E.matchIds(E.currentRound(s).matches[0]).includes(quitter));
   console.log('Pemain keluar + klasemen: OK');
 }
+// Rencana ronde berikutnya = ronde yang benar-benar dimulai
+{
+  const ps = 'ABCDEFGHIJ'.split('').map((n, i) => ({ name: n, gender: i < 3 ? 'F' : 'M' }));
+  const s = E.newTournament({ mode: 'double', scoring: 'simple', courts: 2, players: ps });
+  for (let r = 0; r < 8; r++) {
+    E.startNextRound(s);
+    const plan = JSON.stringify(s.nextPlan.matches.map(m => [m.a, m.b]));
+    E.currentRound(s).matches.forEach(m => E.setResult(s, m.id, 'a'));
+    assert(!E.ensureNextPlan(s), 'hasil pertandingan tidak mengubah rencana');
+    E.startNextRound(s);
+    const started = JSON.stringify(E.currentRound(s).matches.map(m => [m.a, m.b]));
+    assert.strictEqual(started, plan, 'ronde yang dimulai sama dengan rencana');
+    E.currentRound(s).matches.forEach(m => E.setResult(s, m.id, 'b'));
+  }
+  // perubahan pemain membatalkan rencana
+  E.startNextRound(s);
+  E.addPlayer(s, 'Baru', 'M');
+  assert(!E.planIsValid(s) && E.ensureNextPlan(s));
+  const m = E.currentRound(s).matches[0];
+  E.replacePlayer(s, m.id, m.a[0]);
+  assert(!E.planIsValid(s), 'ganti pemain membatalkan rencana');
+  console.log('Rencana ronde berikutnya: OK');
+}
 console.log('Semua tes lulus.');

@@ -166,12 +166,44 @@
   function roundComplete(round) { return !!round && round.matches.every(m => m.result !== null); }
   function roundHasResult(round) { return !!round && round.matches.some(m => m.result !== null); }
 
+  // ---------- rencana ronde berikutnya ----------
+  // Pasangan ronde berikutnya hanya bergantung pada siapa yang main (bukan siapa yang menang),
+  // jadi bisa disusun sejak ronde sekarang dimulai dan ditampilkan sebagai "siap-siap".
+  function planSignature(state) {
+    const cur = currentRound(state);
+    const players = activePlayers(state).map(p => p.id + p.gender).sort().join(',');
+    const lineup = cur ? cur.matches.map(m => m.a.join('+') + 'v' + m.b.join('+')).join('|') : '';
+    return [state.rounds.length, state.mode, state.courts, players, lineup].join('#');
+  }
+
+  function planIsValid(state) {
+    return !!state.nextPlan && state.nextPlan.sig === planSignature(state);
+  }
+
+  // Susun ulang rencana bila belum ada atau sudah tidak cocok. Mengembalikan true bila berubah.
+  function ensureNextPlan(state, force) {
+    if (!force && planIsValid(state)) return false;
+    if (activePlayers(state).length < perMatch(state)) { const had = !!state.nextPlan; state.nextPlan = null; return had; }
+    const r = buildRound(state, []);
+    state.nextPlan = { sig: planSignature(state), matches: r.matches };
+    return true;
+  }
+
+  function nextBench(state) {
+    if (!state.nextPlan) return [];
+    const playing = new Set(state.nextPlan.matches.flatMap(matchIds));
+    return activePlayers(state).map(p => p.id).filter(id => !playing.has(id));
+  }
+
   function startNextRound(state) {
     const cur = currentRound(state);
     if (cur && !roundComplete(cur)) return { ok: false, error: 'Selesaikan semua partai dulu.' };
     if (activePlayers(state).length < perMatch(state)) return { ok: false, error: 'Pemain aktif kurang dari ' + perMatch(state) + '.' };
-    const r = buildRound(state, []);
-    state.rounds.push({ num: state.rounds.length + 1, ...r });
+    ensureNextPlan(state);
+    const matches = state.nextPlan.matches.map(m => ({ ...m, id: uid('m'), a: [...m.a], b: [...m.b], result: null, scoreA: '', scoreB: '' }));
+    state.rounds.push({ num: state.rounds.length + 1, matches, notReady: [] });
+    state.nextPlan = null;
+    ensureNextPlan(state);
     return { ok: true };
   }
 
@@ -293,7 +325,7 @@
   const api = {
     newTournament, startNextRound, reshuffleRound, replacePlayer, removePlayer, addPlayer,
     setResult, setScore, standings, benchOf, currentRound, roundComplete, roundHasResult,
-    perMatch, activePlayers, plannedCourts, history, matchIds,
+    perMatch, activePlayers, plannedCourts, history, matchIds, ensureNextPlan, planIsValid, nextBench,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Engine = api;
