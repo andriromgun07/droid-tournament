@@ -5,8 +5,9 @@ Aplikasi pengacak dan pencatat turnamen badminton (tunggal/ganda, 1–4 lapangan
 ## Alur pemakaian
 1. **Buat turnamen baru**: isi pemain (bisa tempel banyak nama dipisah koma, tandai L/P), pilih format, jumlah lapangan, dan cara mencatat hasil, lalu mulai ronde 1. Pemain dari turnamen terakhir otomatis terisi.
 2. **Ronde**: tiap lapangan tampil sebagai lapangan mini. Ketuk sisi yang menang (atau isi skor). Kalau ada yang belum siap, ketuk *Ada yang belum siap?* untuk menggantinya dengan pemain cadangan.
-3. **Acak ronde berikutnya** aktif setelah semua lapangan ada hasil. Klasemen bisa dibuka kapan saja.
-4. **Menu**: kelola pemain (tambah, keluar, ganti L/P), acak ulang ronde, bagikan link, selesai.
+3. **Siap-siap ronde berikutnya**: di bawah lapangan tampil susunan ronde berikutnya sejak ronde sekarang dimulai, supaya pemain bisa bersiap. Titik kuning = masih main di ronde ini. *Acak ulang* menyusun ulang rencana itu.
+4. **Mulai ronde berikutnya** aktif setelah semua lapangan ada hasil, dan memakai persis susunan yang sudah ditampilkan. Klasemen bisa dibuka kapan saja.
+5. **Menu**: kelola pemain (tambah, keluar, ganti L/P), acak ulang ronde, bagikan link, selesai.
 
 ## Aturan pengacakan
 - Pemain yang ronde lalu istirahat selalu didahulukan, jadi giliran berpindah ke orang berikutnya.
